@@ -4,7 +4,7 @@ data class Gym(
     val id: Int,
     val name: String,
     val location: String,
-    val  isFavorites: Boolean = false
+    var isFavorites: Boolean = false
 )
 
 
