@@ -5,11 +5,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.coroutines.coroutineContext
 
 class GymsViewModel(
     private val stateHandle: SavedStateHandle
@@ -18,7 +23,13 @@ class GymsViewModel(
 
     // instant of API Service
     private val apiService: GymApiService
-    private lateinit var gymsCall  :Call<List<Gym>>
+    private val errorHandle =
+        CoroutineExceptionHandler { _, throwable -> throwable.printStackTrace() }
+//    private lateinit var gyms  :Call<List<Gym>>
+
+//    val job = Job()
+//    val scope = CoroutineScope(context = job + Dispatchers.IO)
+
     init {
         // Retrofit instant object
         val retrofit: Retrofit = Retrofit.Builder()
@@ -32,28 +43,41 @@ class GymsViewModel(
     }
 
     private fun getGyms() {
-        gymsCall = apiService.gitGyms()
-        gymsCall.enqueue(object : Callback<List<Gym>> {
-            override fun onResponse(p0: Call<List<Gym>>, response: Response<List<Gym>>) {
-                response.body()?.let { gymsList ->
-                    state = gymsList.restoreSelectedGym()
+        viewModelScope.launch(Dispatchers.IO + errorHandle) {
+            val gyms =getGymsFromRemoteDB()
+                withContext(Dispatchers.Main) {
+                    state = gyms.restoreSelectedGym()
                 }
-            }
 
-            override fun onFailure(p0: Call<List<Gym>>, t: Throwable) {
-                t.printStackTrace()
-            }
+        }
 
-        })
+
+//        gymsCall = apiService.gitGyms()
+//        gymsCall.enqueue(object : Callback<List<Gym>> {
+//            override fun onResponse(p0: Call<List<Gym>>, response: Response<List<Gym>>) {
+//                response.body()?.let { gymsList ->
+//                    state = gymsList.restoreSelectedGym()
+//                }
+//            }
+//
+//            override fun onFailure(p0: Call<List<Gym>>, t: Throwable) {
+//                t.printStackTrace()
+//            }
+//
+//        })
 //        apiService.gitGyms().execute().body()?.let { gymsList ->
 //            state = gymsList.restoreSelectedGym()
 //        }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        gymsCall.cancel()
+    private suspend fun getGymsFromRemoteDB() = withContext(Dispatchers.IO) {
+        apiService.gitGyms()
+
     }
+//    override fun onCleared() {
+//        super.onCleared()
+//        job.cancel()
+//    }
 
     fun toggleFavoritesState(gymId: Int) {
         val gyms = state.toMutableList()  //Copy from state list
