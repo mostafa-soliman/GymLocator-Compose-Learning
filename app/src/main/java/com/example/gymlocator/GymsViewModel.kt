@@ -7,14 +7,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import kotlin.coroutines.coroutineContext
 
 class GymsViewModel(
     private val stateHandle: SavedStateHandle
@@ -71,7 +68,7 @@ class GymsViewModel(
     }
 
     private suspend fun getGymsFromRemoteDB() = withContext(Dispatchers.IO) {
-        apiService.gitGyms()
+        apiService.getGyms()
 
     }
 //    override fun onCleared() {

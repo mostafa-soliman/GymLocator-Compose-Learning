@@ -15,6 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.gymlocator.ui.theme.GymLocatorTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,9 +27,34 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             GymLocatorTheme {
-                GymScreen()
+                GymAroundApp()
+//                GymScreen()
+                //    GymDetailsScreen()
             }
         }
+    }
+}
+
+@Composable
+fun GymAroundApp() {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = "gyms") {
+        composable(route = "gyms") {
+            GymScreen { id ->
+                navController.navigate("gyms/$id")
+            }
+        }
+        composable(
+            route = "gyms/{gym_id}", arguments = listOf(
+                navArgument("gym_id") {
+                    type = NavType.IntType
+                },
+            )
+        ) {
+            GymDetailsScreen()
+        }
+
     }
 }
 

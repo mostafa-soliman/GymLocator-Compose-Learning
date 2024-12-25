@@ -1,6 +1,5 @@
 package com.example.gymlocator
 
-import android.service.autofill.OnClickAction
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -17,11 +16,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,46 +31,54 @@ import com.example.gymlocator.ui.theme.Pink80
 
 
 @Composable
-fun GymScreen() {
+fun GymScreen(onGymLocatorClicked : (Int) -> Unit) {
     val gymVM: GymsViewModel = viewModel()
 
 
     LazyColumn {
-        items(gymVM.state) {gym ->
-            GymLocatorCard(gym) {
-                gymVM.toggleFavoritesState(it)
-            }
+        items(gymVM.state) { gym ->
+            GymLocatorCard(
+                gym = gym,
+                onFavoritesIconClick = {gymVM.toggleFavoritesState(it)},
+                onGymLocatorClicked = { id ->
+                    onGymLocatorClicked(id)
+                })
         }
 
     }
 
 }
+
 //isFavorites = !isFavorites
 @Composable
-fun GymLocatorCard(gym :Gym,onClick:(Int)->Unit) {
-    val icon =  if (gym.isFavorites){
+fun GymLocatorCard(gym: Gym, onFavoritesIconClick: (Int) -> Unit , onGymLocatorClicked : (Int) -> Unit) {
+    val icon = if (gym.isFavorites) {
         Icons.Filled.Favorite
-    }else{
+    } else {
         Icons.Filled.FavoriteBorder
     }
 
-    Card(elevation = CardDefaults.cardElevation(5.dp), modifier = Modifier.padding(10.dp)) {
-        Row(modifier = Modifier
-            .padding(5.dp)
-            .align(Alignment.CenterHorizontally)) {
+    Card(elevation = CardDefaults.cardElevation(5.dp), modifier = Modifier.padding(10.dp).clickable { onGymLocatorClicked(gym.id) }) {
+        Row(
+            modifier = Modifier
+                .padding(5.dp)
+                .align(Alignment.CenterHorizontally)
+        ) {
 
-            GymIcon(Icons.Filled.LocationOn,
+            GymIcon(
+                Icons.Filled.LocationOn,
                 Modifier
                     .weight(0.15f)
                     .align(Alignment.CenterVertically)
             ) {}
-            GymDetails(gym,Modifier.weight(0.70f))
-            GymIcon(icon,
+            GymDetails(gym, Modifier.weight(0.70f))
+            GymIcon(
+                icon,
                 Modifier
                     .weight(0.15f)
                     .align(Alignment.CenterVertically)
             ) {
-                onClick(gym.id)
+                onFavoritesIconClick(gym.id)
             }
 
         }
@@ -85,17 +87,21 @@ fun GymLocatorCard(gym :Gym,onClick:(Int)->Unit) {
 }
 
 @Composable
-fun GymDetails(gym  : Gym,modifier: Modifier) {
+fun GymDetails(
+    gym: Gym,
+    modifier: Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start
+) {
 
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier, horizontalAlignment = horizontalAlignment) {
         Text(
             text = gym.name,
             style = MaterialTheme.typography.headlineLarge,
             color = Pink80
         )
         Text(
-            text =gym.location,
+            text = gym.location,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.alpha(ContentAlpha.medium)
         )
@@ -105,7 +111,7 @@ fun GymDetails(gym  : Gym,modifier: Modifier) {
 }
 
 @Composable
-fun GymIcon(icon: ImageVector, modifier: Modifier , onClick:() -> Unit = {}) {
+fun GymIcon(icon: ImageVector, modifier: Modifier, onClick: () -> Unit = {}) {
 
     Image(
         imageVector = icon,
@@ -121,10 +127,10 @@ fun GymIcon(icon: ImageVector, modifier: Modifier , onClick:() -> Unit = {}) {
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun x(){
-    GymLocatorTheme {
-        GymScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun x() {
+//    GymLocatorTheme {
+//        GymScreen()
+//    }
+//}
