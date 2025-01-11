@@ -1,48 +1,49 @@
 package com.example.gymlocator
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class GymsViewModel(
     // private val stateHandle: SavedStateHandle  //because used local database  || Room DB
 ) : ViewModel() {
-    var state by mutableStateOf(emptyList<Gym>())
+    private var _state by mutableStateOf(GymsScreenState(gyms = emptyList(), isLoading = true))
+    val state : State<GymsScreenState>
+        get() = derivedStateOf {_state}
 
+    private val repo = GymRepository()
     // instant of API Service
-    private val apiService: GymApiService
-    private val gymsDao = GymsDatabase.getDaoInstant(GymsApplication.getApplicationContext())
     private val errorHandle =
-        CoroutineExceptionHandler { _, throwable -> throwable.printStackTrace() }
+        CoroutineExceptionHandler { _, throwable ->
+            throwable.printStackTrace()
+            _state = _state.copy(
+                isLoading = false,
+                error = throwable.message)
+        }
 //    private lateinit var gyms  :Call<List<Gym>>
 
 //    val job = Job()
 //    val scope = CoroutineScope(context = job + Dispatchers.IO)
 
     init {
-        // Retrofit instant object
-        val retrofit: Retrofit = Retrofit.Builder()
-            .addConverterFactory(
-                GsonConverterFactory.create()
-            ).baseUrl("https://cairo-gyms-3b76a-default-rtdb.firebaseio.com/")
-            .build()
-        apiService = retrofit.create(GymApiService::class.java)
 
         getGyms()
     }
 
     private fun getGyms() {
         viewModelScope.launch(Dispatchers.IO + errorHandle) {
-            state = getGymsFromRemoteDB()
+            val receivedGym = repo.getGymsFromRemoteDB()
+            _state = _state.copy(
+                gyms = receivedGym,
+                isLoading = false
+            )
         }
 
 
@@ -64,30 +65,9 @@ class GymsViewModel(
 //        }
     }
 
-    private suspend fun getGymsFromRemoteDB() = withContext(Dispatchers.IO) {
-        try {
-            updateLocalDatabase()
-        } catch (ex: Exception) {
-            if (gymsDao.getAll().isEmpty()) {
-                throw Exception("Something went wrong. no data was found, try connecting to internet")
-            }
-        }
-        gymsDao.getAll()
-    }
-
-    private suspend fun updateLocalDatabase() {
-        val gyms = apiService.getGyms()
-        val favouriteGymsList = gymsDao.getFavouriteGyms()
-        gymsDao.addAll(gyms)
-        gymsDao.updateAll(
-            favouriteGymsList.map {
-                GymFavouriteState(id = it.id, true)
-            }
-        )
-    }
 
     fun toggleFavoritesState(gymId: Int) {
-        val gyms = state.toMutableList()  //Copy from state list
+        val gyms = _state.gyms.toMutableList()  //Copy from state list
         val itemIndex = gyms.indexOfFirst { it.id == gymId } // Make sure the "id" is equal
         //  because used local database
         //        gyms[itemIndex] =
@@ -95,21 +75,11 @@ class GymsViewModel(
         //        storeSelectedGym(gyms[itemIndex])
         //  state = gyms // update state
         viewModelScope.launch {
-            val updateGymsList = toggleFavoriteGym(gymId, !gyms[itemIndex].isFavorites)
-            state = updateGymsList
+            val updateGymsList = repo.toggleFavoriteGym(gymId, !gyms[itemIndex].isFavorites)
+            _state = _state.copy(gyms = updateGymsList)
         }
     }
 
-    private suspend fun toggleFavoriteGym(gymId: Int, newFavoriteState: Boolean) =
-        withContext(Dispatchers.IO) {
-            gymsDao.update(
-                GymFavouriteState(
-                    id = gymId,
-                    isFavorites = newFavoriteState
-                )
-            )
-            return@withContext gymsDao.getAll()
-        }
 
 //    private fun storeSelectedGym(gym: Gym) {
 //        val savedHandleList = stateHandle.get<List<Int>>(FAV_ID).orEmpty().toMutableList()

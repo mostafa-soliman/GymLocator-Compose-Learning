@@ -2,8 +2,10 @@ package com.example.gymlocator
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,6 +27,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.wear.compose.material.CircularProgressIndicator
 import androidx.wear.compose.material.ContentAlpha
 import com.example.gymlocator.ui.theme.GymLocatorTheme
 import com.example.gymlocator.ui.theme.Pink80
@@ -33,18 +36,26 @@ import com.example.gymlocator.ui.theme.Pink80
 @Composable
 fun GymScreen(onGymLocatorClicked : (Int) -> Unit) {
     val gymVM: GymsViewModel = viewModel()
+    val state = gymVM.state.value
+    Box (contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize())
+    {
+        LazyColumn {
+            items(state.gyms) { gym ->
+                GymLocatorCard(
+                    gym = gym,
+                    onFavoritesIconClick = {gymVM.toggleFavoritesState(it)},
+                    onGymLocatorClicked = { id ->
+                        onGymLocatorClicked(id)
+                    })
+            }
 
-
-    LazyColumn {
-        items(gymVM.state) { gym ->
-            GymLocatorCard(
-                gym = gym,
-                onFavoritesIconClick = {gymVM.toggleFavoritesState(it)},
-                onGymLocatorClicked = { id ->
-                    onGymLocatorClicked(id)
-                })
         }
-
+        if (state.isLoading) CircularProgressIndicator()
+        state.error?.let {
+            Text(it)
+            
+        }
     }
 
 }
@@ -58,7 +69,9 @@ fun GymLocatorCard(gym: Gym, onFavoritesIconClick: (Int) -> Unit , onGymLocatorC
         Icons.Filled.FavoriteBorder
     }
 
-    Card(elevation = CardDefaults.cardElevation(5.dp), modifier = Modifier.padding(10.dp).clickable { onGymLocatorClicked(gym.id) }) {
+    Card(elevation = CardDefaults.cardElevation(5.dp), modifier = Modifier
+        .padding(10.dp)
+        .clickable { onGymLocatorClicked(gym.id) }) {
         Row(
             modifier = Modifier
                 .padding(5.dp)
