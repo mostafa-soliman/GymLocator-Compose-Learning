@@ -1,4 +1,4 @@
-package com.example.gymlocator
+package com.example.gymlocator.gyms.persentation.details
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -6,12 +6,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gymlocator.gyms.domain.Gym
+import com.example.gymlocator.gyms.data.remote.GymApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 
 class GymsDetailsViewModel(private val savedStateHandle: SavedStateHandle): ViewModel() {
 
@@ -39,6 +40,8 @@ class GymsDetailsViewModel(private val savedStateHandle: SavedStateHandle): View
     }
 
     private suspend fun getGymFormRemoteDB(id: Int) = withContext(Dispatchers.IO) {
-        apiService.getGym(id).values.first()
+        apiService.getGym(id).values.first().let {
+            Gym(it.id,it.name,it.location,it.isOpen)
+        }
     }
 }

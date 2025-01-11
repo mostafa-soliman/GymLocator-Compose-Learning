@@ -1,4 +1,4 @@
-package com.example.gymlocator
+package com.example.gymlocator.gyms.persentation.gymsList
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -7,6 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gymlocator.gyms.data.GymsRepository
+import com.example.gymlocator.gyms.domain.GetInitialGymsUseCase
+import com.example.gymlocator.gyms.domain.ToggleFavouriteStateUseCase
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,7 +21,10 @@ class GymsViewModel(
     val state : State<GymsScreenState>
         get() = derivedStateOf {_state}
 
-    private val repo = GymRepository()
+    private val repo = GymsRepository()
+    private val getInitialGymsUseCase = GetInitialGymsUseCase()
+    private val toggleFavouriteStateUseCase = ToggleFavouriteStateUseCase()
+
     // instant of API Service
     private val errorHandle =
         CoroutineExceptionHandler { _, throwable ->
@@ -39,7 +45,7 @@ class GymsViewModel(
 
     private fun getGyms() {
         viewModelScope.launch(Dispatchers.IO + errorHandle) {
-            val receivedGym = repo.getGymsFromRemoteDB()
+            val receivedGym = getInitialGymsUseCase()
             _state = _state.copy(
                 gyms = receivedGym,
                 isLoading = false
@@ -75,7 +81,8 @@ class GymsViewModel(
         //        storeSelectedGym(gyms[itemIndex])
         //  state = gyms // update state
         viewModelScope.launch {
-            val updateGymsList = repo.toggleFavoriteGym(gymId, !gyms[itemIndex].isFavorites)
+            val updateGymsList = toggleFavouriteStateUseCase(gymId, gyms[itemIndex].isFavorites)
+            //val updateGymsList = repo.toggleFavoriteGym(gymId, !gyms[itemIndex].isFavorites)
             _state = _state.copy(gyms = updateGymsList)
         }
     }

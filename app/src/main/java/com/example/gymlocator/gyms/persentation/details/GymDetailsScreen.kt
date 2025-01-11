@@ -1,8 +1,7 @@
-package com.example.gymlocator
+package com.example.gymlocator.gyms.persentation.details
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
@@ -13,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gymlocator.gyms.persentation.gymsList.GymDetails
+import com.example.gymlocator.gyms.persentation.gymsList.GymIcon
 
 @Composable
 fun GymDetailsScreen() {

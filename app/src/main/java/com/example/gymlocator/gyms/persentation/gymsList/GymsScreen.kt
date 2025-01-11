@@ -1,4 +1,4 @@
-package com.example.gymlocator
+package com.example.gymlocator.gyms.persentation.gymsList
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -24,12 +24,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.CircularProgressIndicator
 import androidx.wear.compose.material.ContentAlpha
-import com.example.gymlocator.ui.theme.GymLocatorTheme
+import com.example.gymlocator.gyms.domain.Gym
 import com.example.gymlocator.ui.theme.Pink80
 
 
@@ -62,7 +61,7 @@ fun GymScreen(onGymLocatorClicked : (Int) -> Unit) {
 
 //isFavorites = !isFavorites
 @Composable
-fun GymLocatorCard(gym: Gym, onFavoritesIconClick: (Int) -> Unit , onGymLocatorClicked : (Int) -> Unit) {
+fun GymLocatorCard(gym: Gym, onFavoritesIconClick: (Int) -> Unit, onGymLocatorClicked : (Int) -> Unit) {
     val icon = if (gym.isFavorites) {
         Icons.Filled.Favorite
     } else {
