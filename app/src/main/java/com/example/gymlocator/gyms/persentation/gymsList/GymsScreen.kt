@@ -33,9 +33,13 @@ import com.example.gymlocator.ui.theme.Pink80
 
 
 @Composable
-fun GymScreen(onGymLocatorClicked : (Int) -> Unit) {
-    val gymVM: GymsViewModel = viewModel()
-    val state = gymVM.state.value
+fun GymScreen(
+    state :GymsScreenState,
+    onGymLocatorClicked : (Int) -> Unit,
+    onFavoritesIconClick :(id : Int , oldValue : Boolean) -> Unit
+) {
+   // val gymVM: GymsViewModel = viewModel()
+    //val state = gymVM.state.value
     Box (contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize())
     {
@@ -43,7 +47,7 @@ fun GymScreen(onGymLocatorClicked : (Int) -> Unit) {
             items(state.gyms) { gym ->
                 GymLocatorCard(
                     gym = gym,
-                    onFavoritesIconClick = {gymVM.toggleFavoritesState(it)},
+                    onFavoritesIconClick = {id,oldValue -> onFavoritesIconClick(id,oldValue)},
                     onGymLocatorClicked = { id ->
                         onGymLocatorClicked(id)
                     })
@@ -61,7 +65,7 @@ fun GymScreen(onGymLocatorClicked : (Int) -> Unit) {
 
 //isFavorites = !isFavorites
 @Composable
-fun GymLocatorCard(gym: Gym, onFavoritesIconClick: (Int) -> Unit, onGymLocatorClicked : (Int) -> Unit) {
+fun GymLocatorCard(gym: Gym, onFavoritesIconClick: (Int,Boolean) -> Unit, onGymLocatorClicked : (Int) -> Unit) {
     val icon = if (gym.isFavorites) {
         Icons.Filled.Favorite
     } else {
@@ -90,7 +94,7 @@ fun GymLocatorCard(gym: Gym, onFavoritesIconClick: (Int) -> Unit, onGymLocatorCl
                     .weight(0.15f)
                     .align(Alignment.CenterVertically)
             ) {
-                onFavoritesIconClick(gym.id)
+                onFavoritesIconClick(gym.id,gym.isFavorites)
             }
 
         }

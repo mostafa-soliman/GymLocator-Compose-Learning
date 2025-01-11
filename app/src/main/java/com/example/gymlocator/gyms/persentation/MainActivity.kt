@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.gymlocator.gyms.persentation.details.GymDetailsScreen
 import com.example.gymlocator.gyms.persentation.gymsList.GymScreen
+import com.example.gymlocator.gyms.persentation.gymsList.GymsViewModel
 import com.example.gymlocator.ui.theme.GymLocatorTheme
 
 class MainActivity : ComponentActivity() {
@@ -35,9 +37,13 @@ fun GymAroundApp() {
 
     NavHost(navController = navController, startDestination = "gyms") {
         composable(route = "gyms") {
-            GymScreen { id ->
-                navController.navigate("gyms/$id")
-            }
+            val vm:GymsViewModel = viewModel()
+            GymScreen(
+                state = vm.state.value,
+                onGymLocatorClicked = {id ->
+                    navController.navigate("gyms/$id")},
+                onFavoritesIconClick = { id, oldValue -> vm.toggleFavoritesState(id,oldValue)}
+            ) 
         }
         composable(
             route = "gyms/{gym_id}", arguments = listOf(

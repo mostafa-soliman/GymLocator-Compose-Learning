@@ -72,16 +72,16 @@ class GymsViewModel(
     }
 
 
-    fun toggleFavoritesState(gymId: Int) {
-        val gyms = _state.gyms.toMutableList()  //Copy from state list
-        val itemIndex = gyms.indexOfFirst { it.id == gymId } // Make sure the "id" is equal
+    fun toggleFavoritesState(gymId: Int , oldValue : Boolean) {
+       // val gyms = _state.gyms.toMutableList()  //Copy from state list
+      //  val itemIndex = gyms.indexOfFirst { it.id == gymId } // Make sure the "id" is equal
         //  because used local database
         //        gyms[itemIndex] =
         //            gyms[itemIndex].copy(isFavorites = !gyms[itemIndex].isFavorites) //update value in list
         //        storeSelectedGym(gyms[itemIndex])
         //  state = gyms // update state
         viewModelScope.launch {
-            val updateGymsList = toggleFavouriteStateUseCase(gymId, gyms[itemIndex].isFavorites)
+            val updateGymsList = toggleFavouriteStateUseCase(gymId, oldValue)
             //val updateGymsList = repo.toggleFavoriteGym(gymId, !gyms[itemIndex].isFavorites)
             _state = _state.copy(gyms = updateGymsList)
         }
