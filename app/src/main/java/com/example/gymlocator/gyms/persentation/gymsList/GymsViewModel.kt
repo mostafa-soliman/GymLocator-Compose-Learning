@@ -10,20 +10,25 @@ import androidx.lifecycle.viewModelScope
 import com.example.gymlocator.gyms.data.GymsRepository
 import com.example.gymlocator.gyms.domain.GetInitialGymsUseCase
 import com.example.gymlocator.gyms.domain.ToggleFavouriteStateUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class GymsViewModel(
+@HiltViewModel
+class GymsViewModel @Inject constructor(
+    private val getInitialGymsUseCase: GetInitialGymsUseCase,
+    private val toggleFavouriteStateUseCase: ToggleFavouriteStateUseCase
     // private val stateHandle: SavedStateHandle  //because used local database  || Room DB
 ) : ViewModel() {
     private var _state by mutableStateOf(GymsScreenState(gyms = emptyList(), isLoading = true))
     val state : State<GymsScreenState>
         get() = derivedStateOf {_state}
 
-    private val repo = GymsRepository()
-    private val getInitialGymsUseCase = GetInitialGymsUseCase()
-    private val toggleFavouriteStateUseCase = ToggleFavouriteStateUseCase()
+    //private val repo = GymsRepository()
+    //private val getInitialGymsUseCase = GetInitialGymsUseCase()
+    //private val toggleFavouriteStateUseCase = ToggleFavouriteStateUseCase()
 
     // instant of API Service
     private val errorHandle =

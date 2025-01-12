@@ -1,28 +1,20 @@
 package com.example.gymlocator.gyms.data
 
-import com.example.gymlocator.gyms.domain.Gym
-import com.example.gymlocator.gyms.data.remote.GymApiService
-import com.example.gymlocator.GymsApplication
-import com.example.gymlocator.gyms.data.local.GymsDatabase
+import com.example.gymlocator.gyms.data.local.GymsDAO
 import com.example.gymlocator.gyms.data.local.LocalGym
 import com.example.gymlocator.gyms.data.local.LocalGymFavouriteState
+import com.example.gymlocator.gyms.data.remote.GymApiService
+import com.example.gymlocator.gyms.domain.Gym
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class GymsRepository {
-    // Retrofit instant object
-    private val apiService: GymApiService = Retrofit.Builder()
-        .addConverterFactory(
-            GsonConverterFactory.create()
-        ).baseUrl("https://cairo-gyms-3b76a-default-rtdb.firebaseio.com/")
-        .build()
-        .create(GymApiService::class.java)
-
-    private val gymsDao = GymsDatabase.getDaoInstant(GymsApplication.getApplicationContext())
-
-
+@Singleton
+class GymsRepository @Inject constructor(
+    private val apiService: GymApiService,
+    private val gymsDao:GymsDAO
+) {
     suspend fun loadGyms() = withContext(Dispatchers.IO) {
         try {
             updateLocalDatabase()
